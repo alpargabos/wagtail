@@ -4,32 +4,57 @@ import cucumber.api.PendingException;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import org.junit.Assert;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class AuthenticationStepdefs {
-    User user;
+    String fullName;
     Wagtail wagtail;
+    OutputStream stream;
 
-    @Given("^I am a twitter user$")
+    @Given("^I am a twitter fullName$")
     public void I_am_a_twitter_user() throws Throwable {
-        user = new User("wagtail", "WhiteBlackBird");
+        fullName = "wagtail";
     }
 
     @When("^I provide my credentials$")
     public void I_provide_my_credentials() throws Throwable {
-        wagtail = new Wagtail(user);
+        wagtail = new Wagtail();
+        stream = new OutputStream() {
+            StringBuilder content = new StringBuilder();
+
+            @Override
+            public void write(int i) throws IOException {
+                content.append((char) i);
+            }
+
+            public String toString() {
+                return content.toString();
+            }
+        };
+        wagtail.setUI(stream);
         wagtail.login();
     }
 
-    @Then("^I will be logged in to my twitter account from command line$")
-    public void I_will_be_logged_in_to_my_twitter_account_from_command_line() throws Throwable {
-        Assert.assertTrue(wagtail.isConnected());
+    @Then("^I will be greated on my full name$")
+    public void I_will_be_greated_on_my_full_name() throws Throwable {
+        assertThat(stream.toString(), is("You are logged in as: "+ fullName));
     }
 
-    @When("^I provide invalid credentials$")
-    public void I_provide_invalid_credentials() throws Throwable {
-        // Express the Regexp above with the code you wish you had
-        throw new PendingException();
+    @When("^I grant access to my account for Wagtail$")
+    public void I_grant_access_to_my_account_for_Wagtail() throws Throwable {
+        InputStream input = new InputStream() {
+            @Override
+            public int read() throws IOException {
+                return 555666777;
+            }
+        };
+        wagtail.setInput(input);
     }
 
     @Then("^I am notified about my invalid credentials$")
