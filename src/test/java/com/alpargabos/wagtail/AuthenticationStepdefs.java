@@ -9,7 +9,7 @@ import org.mockito.Mockito;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -56,7 +56,7 @@ public class AuthenticationStepdefs {
 
     @Then("^I will be greeted on my full name$")
     public void I_will_be_greeted_on_my_full_name() throws Throwable {
-        assertThat(output.toString(), is("You are logged in as: "+ fullName));
+        assertThat(output.toString(), startsWith("You are logged in as: " + fullName));
     }
 
 }

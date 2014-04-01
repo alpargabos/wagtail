@@ -30,7 +30,7 @@ public class Wagtail {
 
     public void login() throws TwitterException, IOException {
         RequestToken requestToken = twitter.getOAuthRequestToken();
-        AccessToken accessToken = getPersistedAccessToken();
+        AccessToken accessToken = null;//getPersistedAccessToken();
         while (null == accessToken) {
             String pin = ui.acquirePinCodeFor(requestToken.getAuthorizationURL());
             try {
@@ -65,7 +65,8 @@ public class Wagtail {
         ui.showStatus(result);
     }
 
-    public void searchTweets(String expression) throws TwitterException {
+    public void searchTweets() throws TwitterException {
+        String expression = ui.acquireSearchTerm();
         Query query = new Query(expression);
         QueryResult result = twitter.search(query);
         for (Status status : result.getTweets()) {
@@ -79,8 +80,26 @@ public class Wagtail {
         ui.warnUser("Successfully deleted status [" + id + "].");
     }
 
-    public void runInReactiveMode(){
-        //ui
+    public void runInReactiveMode() throws TwitterException, IOException {
+        while (isRunning()) {
+            String key = ui.acquireUserAction();
+            if ("h".equals(key)) {
+                key = ui.acquireUserAction();
+            }
+            if ("n".equals(key)) {
+                writeStatus();
+            } else if ("d".equals(key)) {
+                deleteTweet();
+            } else if ("t".equals(key)) {
+                printHomeLine();
+            }else if ("s".equals(key)) {
+                searchTweets();
+            }
+        }
+    }
+
+    protected boolean isRunning() {
+        return true;
     }
 
 
@@ -88,7 +107,7 @@ public class Wagtail {
         this.twitter = twitter;
     }
 
-    public void setUserInputSource(Reader reader){
+    public void setUserInputSource(Reader reader) {
         ui.reader = reader;
     }
 

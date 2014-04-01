@@ -26,7 +26,7 @@ public class Ui {
     }
 
     public void warnUser(String warning) {
-        printer.println(warning);
+        printer.printlnWarning(warning);
     }
 
     public void welcomeUser(String name) {
@@ -34,7 +34,7 @@ public class Ui {
     }
 
     public void showStatus(Status status) {
-        printer.println("id:"+status.getId()+" "+status.getUser().getName() + ":" + status.getText());
+        printer.println("[\\033[44;1;31m\\] id:"+status.getId()+" "+status.getUser().getName() + ":" + status.getText());
     }
 
     public String acquireNewStatus() {
@@ -75,5 +75,33 @@ public class Ui {
             key = reader.getUserInput();
         }
         return key;
+    }
+
+    public String acquireSearchTerm() {
+        String searchTerm;
+        printer.println("Please give something to search(press \"e\" for possible search operators):");
+        searchTerm = reader.getUserInput();
+        if("e".equals(searchTerm)){
+            printer.println("Search operators:");
+            printer.println("twitter search\tcontaining both \"twitter\" and \"search\". This is the default operator.\n" +
+                    "\"happy hour\"\tcontaining the exact phrase \"happy hour\".\n" +
+                    "love OR hate\tcontaining either \"love\" or \"hate\" (or both).\n" +
+                    "beer -root\tcontaining \"beer\" but not \"root\".\n" +
+                    "#haiku\tcontaining the hashtag \"haiku\".\n" +
+                    "from:alexiskold\tsent from person \"alexiskold\".\n" +
+                    "to:techcrunch\tsent to person \"techcrunch\".\n" +
+                    "@mashable\treferencing person \"mashable\".\n" +
+                    "\"happy hour\" near:\"san francisco\"\tcontaining the exact phrase \"happy hour\" and sent near \"san francisco\".\n" +
+                    "near:NYC within:15mi\tsent within 15 miles of \"NYC\".\n" +
+                    "superhero since:2010-12-27\tcontaining \"superhero\" and sent since date \"2010-12-27\" (year-month-day).\n" +
+                    "ftw until:2010-12-27\tcontaining \"ftw\" and sent up to date \"2010-12-27\".\n" +
+                    "movie -scary :)\tcontaining \"movie\", but not \"scary\", and with a positive attitude.\n" +
+                    "flight :(\tcontaining \"flight\" and with a negative attitude.\n" +
+                    "traffic ?\tcontaining \"traffic\" and asking a question.\n" +
+                    "hilarious filter:links\tcontaining \"hilarious\" and linking to URLs.\n" +
+                    "news source:twitterfeed\tcontaining \"news\" and entered via TwitterFeed\n");
+            searchTerm = reader.getUserInput();
+        }
+        return searchTerm;
     }
 }

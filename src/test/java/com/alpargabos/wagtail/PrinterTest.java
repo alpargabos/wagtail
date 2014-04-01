@@ -55,11 +55,9 @@ public class PrinterTest {
         verify(writer).write(contains("Hotkeys"));
         verify(writer).write(contains("h - help"));
         verify(writer).write(contains("n - new status"));
-        verify(writer).write(contains("d <id> - delete status"));
+        verify(writer).write(contains("d - delete status"));
         verify(writer).write(contains("t - timeline"));
-        verify(writer).write(contains("s <search term> - search"));
-        verify(writer).write(contains("ESC - cancel"));
-        verify(writer).write(contains("CTRL + C - close the program"));
+        verify(writer).write(contains("s - search"));
         verify(writer).write(contains("choice?"));
     }
 }

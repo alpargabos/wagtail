@@ -16,6 +16,8 @@ import static org.mockito.Mockito.*;
 
 public class UiTest {
 
+    private static final String ANYTHING = "(?s).*";
+
     Ui ui;
 
     @Before
@@ -71,7 +73,7 @@ public class UiTest {
         //when
         ui.showStatus(status);
         //then
-        verify(ui.printer).println(matches(".*21.*Alpar.*hello"));
+        verify(ui.printer).println(containsAll("21","Alpar","hello"));
     }
 
     @Test
@@ -82,7 +84,7 @@ public class UiTest {
         String tweet = ui.acquireNewStatus();
         //then
         assertThat(tweet, is("new tweet"));
-        verify(ui.printer).println(matches("^Please.*140 char.*"));
+        verify(ui.printer).println(containsAll("^Please","140 char" ));
     }
 
     @Test
@@ -95,7 +97,7 @@ public class UiTest {
         String tweet = ui.acquireNewStatus();
         //then
         assertThat(tweet, is("valid tweet with less than 140 characters"));
-        verify(ui.printer, times(2)).println(matches("^Please.*140 char.*"));
+        verify(ui.printer, times(2)).println(containsAll("Please","140 char"));
     }
 
     @Test
@@ -105,7 +107,7 @@ public class UiTest {
         //when
         ui.acquireTweetIdForDeletion();
         //then
-        verify(ui.printer).println(matches(".*id.*tweet.*"));
+        verify(ui.printer).println(containsAll( "id","tweet" ));
     }
 
     @Test
@@ -117,7 +119,7 @@ public class UiTest {
         //when
         ui.acquireTweetIdForDeletion();
         //then
-        verify(ui.printer, times(2)).println(matches(".*id.*tweet.*"));
+        verify(ui.printer, times(2)).println(containsAll("id","tweet"));
     }
 
     @Test
@@ -131,8 +133,8 @@ public class UiTest {
         //then
         verify(ui.printer).println(contains("time line"));
         verify(ui.printer).println(contains("last 2"));
-        verify(ui.printer).println(matches(".*21.*Alpar.*Hi"));
-        verify(ui.printer).println(matches(".*23.*John.*Good morning"));
+        verify(ui.printer).println(containsAll("21","Alpar","Hi"));
+        verify(ui.printer).println(containsAll("23","John","Good morning"));
 
     }
 
@@ -166,6 +168,40 @@ public class UiTest {
         //then
         assertThat(key, is("h"));
         verify(ui.printer).printControllKeys();
-        verify(ui.printer).println(matches(".*valid key.*"));
+        verify(ui.printer).println(contains("valid key"));
     }
+
+
+    @Test
+    public void acquireSearchTermAsksUserToProvideASearchTerm() throws Exception {
+        //given
+        when(ui.reader.getUserInput()).thenReturn("obama");
+        //when
+        String searchTerm = ui.acquireSearchTerm();
+        //then
+        assertThat(searchTerm, is("obama"));
+        verify(ui.printer).println(containsAll("Please", "search"));
+    }
+
+    @Test
+    public void acquireSearchTermCouldPrintPossibleSearchExpressions() throws Exception {
+        //given
+        when(ui.reader.getUserInput()).thenReturn("e").thenReturn("obama");
+        //when
+        String searchTerm = ui.acquireSearchTerm();
+        //then
+        assertThat(searchTerm, is("obama"));
+        verify(ui.printer).println(containsAll("Please", "search"));
+        verify(ui.printer).println(containsAll("Search operators"));
+        verify(ui.printer).println(containsAll("@mashable", "referencing person"));
+    }
+
+    private static String containsAll(String... strings){
+        String expression = ANYTHING;
+        for (String s:strings){
+            expression += s + ANYTHING;
+        }
+        return matches(expression);
+    }
+
 }

@@ -18,12 +18,17 @@ public class WagtailTest {
     @Before
     public void setUp(){
         wagtail = new Wagtail(){
+            int i = 0;
             @Override
             protected void persistAccessToken(AccessToken accessToken) {
             }
             @Override
             protected AccessToken getPersistedAccessToken() {
                 return null;
+            }
+            @Override
+            protected boolean isRunning(){
+                return i++ < 1;
             }
         };
         ui = mock(Ui.class);
@@ -77,8 +82,9 @@ public class WagtailTest {
         Status status2 = mock(Status.class);
         when(result.getTweets()).thenReturn(Arrays.asList(status1, status2));
         when(twitter.search(any(Query.class))).thenReturn(result);
+        when(ui.acquireSearchTerm()).thenReturn("accu");
         //when
-        wagtail.searchTweets("accu");
+        wagtail.searchTweets();
         //then
         verify(ui).showStatus(status1);
         verify(ui).showStatus(status2);
@@ -95,4 +101,58 @@ public class WagtailTest {
         verify(ui).warnUser(anyString());
     }
 
+    @Test
+    public void runInReactiveModeForHShowsHelp() throws Exception {
+        //given
+        when(ui.acquireUserAction()).thenReturn("h");
+        //when
+        wagtail.runInReactiveMode();
+        //then
+        verify(ui, times(2)).acquireUserAction();
+    }
+
+    @Test
+    public void runInReactiveModeForNPostNewStatus() throws Exception {
+        //given
+        when(ui.acquireUserAction()).thenReturn("n");
+        //when
+        wagtail.runInReactiveMode();
+        //then
+        verify(ui).acquireNewStatus();
+        verify(twitter).updateStatus(any(String.class));
+    }
+
+    @Test
+    public void runInReactiveModeForDDeletesAStatus() throws Exception {
+        //given
+        when(ui.acquireUserAction()).thenReturn("d");
+        //when
+        wagtail.runInReactiveMode();
+        //then
+        verify(ui).acquireTweetIdForDeletion();
+        verify(twitter).destroyStatus(any(Long.class));
+    }
+
+    @Test
+    public void runInReactiveModeForTShowsHomeLine() throws Exception {
+        //given
+        when(ui.acquireUserAction()).thenReturn("t");
+        //when
+        wagtail.runInReactiveMode();
+        //then
+        verify(twitter).getHomeTimeline();
+        verify(ui).showTimeLine(anyList());
+    }
+
+    @Test
+    public void runInReactiveModeForSSearchesAmongsStatuses() throws Exception {
+        //given
+        when(ui.acquireUserAction()).thenReturn("s");
+        when(twitter.search(any(Query.class))).thenReturn(mock(QueryResult.class));
+        //when
+        wagtail.runInReactiveMode();
+        //then
+        verify(ui).acquireSearchTerm();
+        verify(twitter).search(any(Query.class));
+    }
 }

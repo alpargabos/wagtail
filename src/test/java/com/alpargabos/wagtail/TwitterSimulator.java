@@ -41,13 +41,22 @@ public class TwitterSimulator {
     }
 
     public Twitter getTwitterForLogin(String username) {
-        cb = new ConfigurationBuilder();
-        cb.setDebugEnabled(true)
-                .setOAuthConsumerKey(Wagtail.CONSUMER_KEY)
-                .setOAuthConsumerSecret(Wagtail.CONSUMER_SECRET);
-        //server.enqueue(new MockResponse().setBody(""));
-        server.enqueue(new MockResponse().setBody("oauth_token=2405056022-zWhCwEGhvIyr5WKQbOnbH9gxsDmcUBGxxnhGI6s&oauth_token_secret=bcqSUSBZvDbSmVvfUHzCA5cI05BnVBvOe3WM7wz085M1b&user_id=2405056022&\n" +
-                "screen_name=" + username));
+        getConfigurationBuilder();
+
+        server.enqueue(new MockResponse().setBody(getLoginJsonWithUsername(username)));
+
+        return createTwitter();
+    }
+
+    public Twitter getTwitterForInvalidLogin() {
+        getConfigurationBuilder();
+
+        server.enqueue(new MockResponse().setResponseCode(401));
+
+        return createTwitter();
+    }
+
+    private Twitter createTwitter() {
         try {
             server.play();
         } catch (IOException e) {
@@ -58,5 +67,16 @@ public class TwitterSimulator {
         cb.setOAuthAuthenticationURL(server.getUrl("/twitter/").toString());
         cb.setOAuthAuthorizationURL(server.getUrl("/twitter/").toString());
         return new TwitterFactory(cb.build()).getInstance();
+    }
+
+    private void getConfigurationBuilder() {
+        cb = new ConfigurationBuilder();
+        cb.setDebugEnabled(true)
+                .setOAuthConsumerKey(Wagtail.CONSUMER_KEY)
+                .setOAuthConsumerSecret(Wagtail.CONSUMER_SECRET);
+    }
+
+    private String getLoginJsonWithUsername(String username) {
+        return "{\"location\":\"\",\"default_profile\":true,\"profile_background_tile\":false,\"statuses_count\":1,\"lang\":\"en\",\"profile_link_color\":\"0084B4\",\"id\":2405056022,\"following\":false,\"protected\":false,\"favourites_count\":0,\"profile_text_color\":\"333333\",\"description\":\"wagtail, twitter console app, great, useful, made with BDD\",\"verified\":false,\"contributors_enabled\":false,\"profile_sidebar_border_color\":\"C0DEED\",\"name\":\"Wagtail\",\"profile_background_color\":\"C0DEED\",\"created_at\":\"Sat Mar 22 21:18:59 +0000 2014\",\"is_translation_enabled\":false,\"default_profile_image\":false,\"followers_count\":0,\"profile_image_url_https\":\"https://pbs.twimg.com/profile_images/447485222125199360/_T9H7blD_normal.jpeg\",\"geo_enabled\":false,\"status\":{\"contributors\":null,\"text\":\"my very first tweet\",\"geo\":null,\"retweeted\":false,\"in_reply_to_screen_name\":null,\"truncated\":false,\"lang\":\"en\",\"entities\":{\"symbols\":[],\"urls\":[],\"hashtags\":[],\"user_mentions\":[]},\"in_reply_to_status_id_str\":null,\"id\":447486650495827970,\"source\":\"web\",\"in_reply_to_user_id_str\":null,\"favorited\":false,\"in_reply_to_status_id\":null,\"retweet_count\":0,\"created_at\":\"Sat Mar 22 21:35:06 +0000 2014\",\"in_reply_to_user_id\":null,\"favorite_count\":0,\"id_str\":\"447486650495827970\",\"place\":null,\"coordinates\":null},\"profile_background_image_url\":\"http://abs.twimg.com/images/themes/theme1/bg.png\",\"profile_background_image_url_https\":\"https://abs.twimg.com/images/themes/theme1/bg.png\",\"follow_request_sent\":false,\"entities\":{\"description\":{\"urls\":[]}},\"url\":null,\"utc_offset\":7200,\"time_zone\":\"Amsterdam\",\"notifications\":false,\"profile_use_background_image\":true,\"friends_count\":16,\"profile_sidebar_fill_color\":\"DDEEF6\",\"screen_name\":\""+username+"\",\"id_str\":\"2405056022\",\"profile_image_url\":\"http://pbs.twimg.com/profile_images/447485222125199360/_T9H7blD_normal.jpeg\",\"listed_count\":0,\"is_translator\":false}";
     }
 }
