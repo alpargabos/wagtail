@@ -9,6 +9,7 @@ import twitter4j.User;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.alpargabos.wagtail.TestHelper.containsAll;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.contains;
@@ -16,7 +17,6 @@ import static org.mockito.Mockito.*;
 
 public class UiTest {
 
-    private static final String ANYTHING = "(?s).*";
 
     Ui ui;
 
@@ -73,7 +73,7 @@ public class UiTest {
         //when
         ui.showStatus(status);
         //then
-        verify(ui.printer).println(containsAll("21","Alpar","hello"));
+        verify(ui.printer).println(containsAll("21", "Alpar", "hello"));
     }
 
     @Test
@@ -84,7 +84,7 @@ public class UiTest {
         String tweet = ui.acquireNewStatus();
         //then
         assertThat(tweet, is("new tweet"));
-        verify(ui.printer).println(containsAll("^Please","140 char" ));
+        verify(ui.printer).println(containsAll("^Please", "140 char"));
     }
 
     @Test
@@ -97,7 +97,7 @@ public class UiTest {
         String tweet = ui.acquireNewStatus();
         //then
         assertThat(tweet, is("valid tweet with less than 140 characters"));
-        verify(ui.printer, times(2)).println(containsAll("Please","140 char"));
+        verify(ui.printer, times(2)).println(containsAll("Please", "140 char"));
     }
 
     @Test
@@ -107,7 +107,7 @@ public class UiTest {
         //when
         ui.acquireTweetIdForDeletion();
         //then
-        verify(ui.printer).println(containsAll( "id","tweet" ));
+        verify(ui.printer).println(containsAll("id", "tweet"));
     }
 
     @Test
@@ -194,14 +194,6 @@ public class UiTest {
         verify(ui.printer).println(containsAll("Please", "search"));
         verify(ui.printer).println(containsAll("Search operators"));
         verify(ui.printer).println(containsAll("@mashable", "referencing person"));
-    }
-
-    private static String containsAll(String... strings){
-        String expression = ANYTHING;
-        for (String s:strings){
-            expression += s + ANYTHING;
-        }
-        return matches(expression);
     }
 
 }

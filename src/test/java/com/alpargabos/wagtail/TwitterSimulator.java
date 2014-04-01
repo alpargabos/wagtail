@@ -7,6 +7,7 @@ import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 
 public class TwitterSimulator {
     private Twitter twitter;
@@ -51,8 +52,12 @@ public class TwitterSimulator {
     public Twitter getTwitterForInvalidLogin() {
         ConfigurationBuilder cb = getConfigurationBuilder();
         MockWebServer server = new MockWebServer();
-        server.enqueue(new MockResponse().setResponseCode(401));
+        server.enqueue(new MockResponse().setBody(getRequestToken()).setResponseCode(HttpURLConnection.HTTP_OK));
+        server.enqueue(new MockResponse().setBody("Not authorized!").setResponseCode(HttpURLConnection.HTTP_UNAUTHORIZED));
+        server.enqueue(new MockResponse().setBody(getAuthToken("Test_user")));
+        server.enqueue(new MockResponse().setBody(getLoginJsonWithUsername("Test_user")));
         return createTwitter(cb, server);
+
     }
 
     private Twitter createTwitter(ConfigurationBuilder cb, MockWebServer server) {

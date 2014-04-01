@@ -33,7 +33,7 @@ public class Wagtail {
     public void login() throws TwitterException, IOException {
         RequestToken requestToken = twitter.getOAuthRequestToken();
         AccessToken accessToken = getPersistedAccessToken();
-        while (null == accessToken) {
+        while (isAccessTokenNull(accessToken)) {
             String pin = ui.acquirePinCodeFor(requestToken.getAuthorizationURL());
             try {
                 accessToken = twitter.getOAuthAccessToken(requestToken, pin);
@@ -46,6 +46,10 @@ public class Wagtail {
         twitter.setOAuthAccessToken(accessToken);
         persistAccessToken(accessToken);
         ui.welcomeUser(twitter.getScreenName());
+    }
+
+    protected boolean isAccessTokenNull(AccessToken accessToken) {
+        return null == accessToken;
     }
 
     protected void persistAccessToken(AccessToken accessToken) {
@@ -109,22 +113,15 @@ public class Wagtail {
         this.twitter = twitter;
     }
 
-    public void setUserInputSource(Reader reader) {
-        ui.reader = reader;
-    }
-
-    public void setOutput(OutputStream output) {
+    void setOutput(OutputStream output) {
         ui.printer = new Printer(new PrintWriter(output));
     }
 
-    public void setInput(Reader input) {
+    void setInput(Reader input) {
         ui.reader = input;
     }
 
-    public void setUI(Ui ui) {
+    void setUI(Ui ui) {
         this.ui = ui;
-    }
-    public void setStore(Store store){
-        this.store = store;
     }
 }
