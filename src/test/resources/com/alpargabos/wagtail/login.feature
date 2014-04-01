@@ -5,12 +5,5 @@ Feature: Login
 
   Scenario: Login with existing credentials
     Given I am a twitter user
-    When I login with my valid credentials
+    When I grant access to my account for Wagtail
     Then I will be greeted on my full name
-
-  @wip
-  Scenario: Login with invalid credentials
-    Given I am a twitter user
-    When I try to login with false credentials
-    Then I am notified about the unsuccessful login
-      And I can try the login again

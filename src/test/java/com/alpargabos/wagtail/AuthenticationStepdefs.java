@@ -1,31 +1,30 @@
 package com.alpargabos.wagtail;
 
-import cucumber.api.PendingException;
+import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import org.mockito.Mockito;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.when;
 
 public class AuthenticationStepdefs {
+    public static final String PIN_CODE = "1234567";
     String fullName;
     Wagtail wagtail;
-    OutputStream stream;
+    TwitterSimulator twitterSimulator;
+    OutputStream output;
+    Reader input;
 
-    @Given("^I am a twitter fullName$")
-    public void I_am_a_twitter_user() throws Throwable {
-        fullName = "wagtail";
-    }
-
-    @When("^I provide my credentials$")
-    public void I_provide_my_credentials() throws Throwable {
+    @Before
+    public void beforeScenario(){
         wagtail = new Wagtail();
-        stream = new OutputStream() {
+        output = new OutputStream() {
             StringBuilder content = new StringBuilder();
 
             @Override
@@ -37,37 +36,27 @@ public class AuthenticationStepdefs {
                 return content.toString();
             }
         };
-        wagtail.setUI(stream);
-        wagtail.login();
+        input = Mockito.mock(Reader.class);
+        wagtail.setInput(input);
+        wagtail.setOutput(output);
+        twitterSimulator = new TwitterSimulator();
     }
 
-    @Then("^I will be greated on my full name$")
-    public void I_will_be_greated_on_my_full_name() throws Throwable {
-        assertThat(stream.toString(), is("You are logged in as: "+ fullName));
+    @Given("^I am a twitter user")
+    public void I_am_a_twitter_user() throws Throwable {
+        fullName = "wagtailbirdapp";
     }
 
     @When("^I grant access to my account for Wagtail$")
     public void I_grant_access_to_my_account_for_Wagtail() throws Throwable {
-        InputStream input = new InputStream() {
-            @Override
-            public int read() throws IOException {
-                return 555666777;
-            }
-        };
-        wagtail.setInput(input);
+        wagtail.setTwitter(twitterSimulator.getTwitterForLogin(fullName));
+        when(input.getUserInput()).thenReturn(PIN_CODE);
+        wagtail.login();
     }
 
-    @Then("^I am notified about my invalid credentials$")
-    public void I_am_notified_about_my_invalid_credentials() throws Throwable {
-        // Express the Regexp above with the code you wish you had
-        throw new PendingException();
-    }
-
-
-    @Then("^I can type my credentials again$")
-    public void I_can_type_my_credentials_again() throws Throwable {
-        // Express the Regexp above with the code you wish you had
-        throw new PendingException();
+    @Then("^I will be greeted on my full name$")
+    public void I_will_be_greeted_on_my_full_name() throws Throwable {
+        assertThat(output.toString(), is("You are logged in as: "+ fullName));
     }
 
 }
