@@ -9,8 +9,11 @@ import org.mockito.Mockito;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import static org.hamcrest.CoreMatchers.startsWith;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.contains;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class AuthenticationStepdefs {
@@ -29,6 +32,7 @@ public class AuthenticationStepdefs {
 
             @Override
             public void write(int i) throws IOException {
+                System.out.print((char) i);
                 content.append((char) i);
             }
 
@@ -39,6 +43,7 @@ public class AuthenticationStepdefs {
         input = Mockito.mock(Reader.class);
         wagtail.setInput(input);
         wagtail.setOutput(output);
+        wagtail.setStore(mock(Store.class));
         twitterSimulator = new TwitterSimulator();
     }
 
@@ -56,7 +61,18 @@ public class AuthenticationStepdefs {
 
     @Then("^I will be greeted on my full name$")
     public void I_will_be_greeted_on_my_full_name() throws Throwable {
-        assertThat(output.toString(), startsWith("You are logged in as: " + fullName));
+        assertTrue(output.toString().contains("You are logged in as: " + fullName));
     }
 
+    @When("^I don't grant access to my account for Wagtail$")
+    public void I_don_t_grant_access_to_my_account_for_Wagtail() throws Throwable {
+        //wagtail.setTwitter(twitterSimulator.getTwitterForInvalidLogin());
+        //when(input.getUserInput()).thenReturn("7654321");
+        //wagtail.login();
+    }
+
+    @Then("^I will be asked to grant access to my twitter account$")
+    public void I_will_be_asked_to_grant_access_to_my_twitter_account() throws Throwable {
+        assertThat(output.toString(), is(contains("Enter the PIN")));
+    }
 }

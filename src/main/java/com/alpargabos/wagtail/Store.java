@@ -8,21 +8,25 @@ import java.util.Properties;
 public class Store {
 
 
-    public static AccessToken getPersistedAccessToken(){
+    public static final String CONFIG_FILE = "config.properties";
+    public static final String TOKEN = "token";
+    public static final String SECRET = "secret";
+
+    public AccessToken getPersistedAccessToken(){
         Properties props = readPersistedData();
-        if (props.get("token") != null && props.get("secret") != null) {
-            return new AccessToken(props.get("token").toString(), props.get("secret").toString());
+        if (props.get(TOKEN) != null && props.get(SECRET) != null) {
+            return new AccessToken(props.get(TOKEN).toString(), props.get(SECRET).toString());
         }
         return null;
     }
 
-    private static Properties readPersistedData() {
+    private Properties readPersistedData() {
         Properties prop = new Properties();
-        File f = new File("config.properties");
+        File f = new File(CONFIG_FILE);
         if (f.exists() && !f.isDirectory()) {
             InputStream input = null;
             try {
-                input = new FileInputStream("config.properties");
+                input = new FileInputStream(CONFIG_FILE);
                 prop.load(input);
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -40,14 +44,13 @@ public class Store {
     }
 
 
-    public static void persistsData(AccessToken accessToken) {
+    public void persistsData(AccessToken accessToken) {
         Properties prop = new Properties();
         OutputStream output = null;
         try {
-            output = new FileOutputStream("config.properties");
-            prop.setProperty("id", String.valueOf(accessToken.getUserId()));
-            prop.setProperty("token", accessToken.getToken());
-            prop.setProperty("secret", accessToken.getTokenSecret());
+            output = new FileOutputStream(CONFIG_FILE);
+            prop.setProperty(TOKEN, accessToken.getToken());
+            prop.setProperty(SECRET, accessToken.getTokenSecret());
             prop.store(output, null);
         } catch (IOException io) {
             io.printStackTrace();

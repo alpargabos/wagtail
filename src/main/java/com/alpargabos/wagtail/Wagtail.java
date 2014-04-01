@@ -17,6 +17,7 @@ public class Wagtail {
     public static final String CONSUMER_SECRET = "1evGkZGOympVOmoHDvQLxkbnWCU5PgrBU8oFrTAZw";
     private Twitter twitter;
     private Ui ui;
+    private Store store;
 
     public Wagtail() {
         ui = new Ui();
@@ -26,11 +27,12 @@ public class Wagtail {
                 .setOAuthConsumerSecret(CONSUMER_SECRET)
                 .build();
         twitter = new TwitterFactory(conf).getInstance();
+        store = new Store();
     }
 
     public void login() throws TwitterException, IOException {
         RequestToken requestToken = twitter.getOAuthRequestToken();
-        AccessToken accessToken = null;//getPersistedAccessToken();
+        AccessToken accessToken = getPersistedAccessToken();
         while (null == accessToken) {
             String pin = ui.acquirePinCodeFor(requestToken.getAuthorizationURL());
             try {
@@ -47,11 +49,11 @@ public class Wagtail {
     }
 
     protected void persistAccessToken(AccessToken accessToken) {
-        Store.persistsData(accessToken);
+        store.persistsData(accessToken);
     }
 
     protected AccessToken getPersistedAccessToken() {
-        return Store.getPersistedAccessToken();
+        return store.getPersistedAccessToken();
     }
 
     public void printHomeLine() throws TwitterException, IOException {
@@ -121,5 +123,8 @@ public class Wagtail {
 
     public void setUI(Ui ui) {
         this.ui = ui;
+    }
+    public void setStore(Store store){
+        this.store = store;
     }
 }
