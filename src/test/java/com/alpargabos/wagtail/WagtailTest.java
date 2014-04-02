@@ -14,18 +14,12 @@ public class WagtailTest {
     Wagtail wagtail;
     Twitter twitter;
     Ui ui;
+    Store store;
 
     @Before
     public void setUp(){
         wagtail = new Wagtail(){
             int i = 0;
-            @Override
-            protected void persistAccessToken(AccessToken accessToken) {
-            }
-            @Override
-            protected AccessToken getPersistedAccessToken() {
-                return null;
-            }
             @Override
             protected boolean isRunning(){
                 return i++ < 1;
@@ -35,6 +29,8 @@ public class WagtailTest {
         twitter = mock(Twitter.class);
         wagtail.setUI(ui);
         wagtail.setTwitter(twitter);
+        store = mock(Store.class);
+        wagtail.setStore(store);
     }
 
     @Test
@@ -154,5 +150,15 @@ public class WagtailTest {
         //then
         verify(ui).acquireSearchTerm();
         verify(twitter).search(any(Query.class));
+    }
+
+    @Test
+    public void runInReactiveModeForXLogsUserOutFromTheApplication() throws Exception {
+        //given
+        when(ui.acquireUserAction()).thenReturn("x");
+        //when
+        wagtail.runInReactiveMode();
+        //then
+        verify(store).removePersistedData();
     }
 }

@@ -18,6 +18,7 @@ public class Wagtail {
     private Twitter twitter;
     private Ui ui;
     private Store store;
+    private boolean isRunning = true;
 
     public Wagtail() {
         ui = new Ui();
@@ -30,10 +31,10 @@ public class Wagtail {
         store = new Store();
     }
 
-    public void login() throws TwitterException, IOException {
+    public boolean login() throws TwitterException, IOException {
         RequestToken requestToken = twitter.getOAuthRequestToken();
         AccessToken accessToken = getPersistedAccessToken();
-        while (isAccessTokenNull(accessToken)) {
+        if (accessToken == null) {
             String pin = ui.acquirePinCodeFor(requestToken.getAuthorizationURL());
             try {
                 accessToken = twitter.getOAuthAccessToken(requestToken, pin);
@@ -43,13 +44,14 @@ public class Wagtail {
                 }
             }
         }
-        twitter.setOAuthAccessToken(accessToken);
-        persistAccessToken(accessToken);
-        ui.welcomeUser(twitter.getScreenName());
-    }
-
-    protected boolean isAccessTokenNull(AccessToken accessToken) {
-        return null == accessToken;
+        if (accessToken != null) {
+            twitter.setOAuthAccessToken(accessToken);
+            persistAccessToken(accessToken);
+            ui.welcomeUser(twitter.getScreenName());
+            return true;
+        } else {
+            return false;
+        }
     }
 
     protected void persistAccessToken(AccessToken accessToken) {
@@ -86,6 +88,12 @@ public class Wagtail {
         ui.warnUser("Successfully deleted status [" + id + "].");
     }
 
+
+    public void logout() {
+        isRunning = false;
+        store.removePersistedData();
+    }
+
     public void runInReactiveMode() throws TwitterException, IOException {
         while (isRunning()) {
             String key = ui.acquireUserAction();
@@ -98,14 +106,16 @@ public class Wagtail {
                 deleteTweet();
             } else if ("t".equals(key)) {
                 printHomeLine();
-            }else if ("s".equals(key)) {
+            } else if ("s".equals(key)) {
                 searchTweets();
+            } else if ("x".equals(key)) {
+                logout();
             }
         }
     }
 
     protected boolean isRunning() {
-        return true;
+        return isRunning;
     }
 
 
@@ -124,4 +134,9 @@ public class Wagtail {
     void setUI(Ui ui) {
         this.ui = ui;
     }
+
+    void setStore(Store store) {
+        this.store = store;
+    }
+
 }

@@ -11,7 +11,7 @@ Feature: Authentication
   Scenario: Login with invalid credentials
     Given I am a twitter user
     When I don't grant access to my account for Wagtail
-    Then I will be asked to grant access to my twitter account
+    Then I will be notified about the unsuccessful login
 
   Scenario: Wagtail remembers the credentials after a successful login
     Given I am an authenticated user who closed the application

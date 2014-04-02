@@ -55,7 +55,7 @@ public class UiTest {
         //when
         ui.warnUser("warning");
         //then
-        verify(ui.printer).println("warning");
+        verify(ui.printer).printlnWarning("warning");
     }
 
     @Test

@@ -65,4 +65,7 @@ public class Store {
         }
     }
 
+    public void removePersistedData() {
+        new File(CONFIG_FILE).delete();
+    }
 }

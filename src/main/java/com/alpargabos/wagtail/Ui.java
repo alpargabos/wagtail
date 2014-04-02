@@ -34,7 +34,7 @@ public class Ui {
     }
 
     public void showStatus(Status status) {
-        printer.println("[\\033[44;1;31m\\] id:"+status.getId()+" "+status.getUser().getName() + ":" + status.getText());
+        printer.println("id:"+status.getId()+" "+status.getUser().getName() + ":" + status.getText());
     }
 
     public String acquireNewStatus() {
