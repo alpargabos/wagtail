@@ -10,10 +10,9 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 
 public class TwitterSimulator {
-    private Twitter twitter;
-
-
-    public TwitterSimulator() {
+    String username;
+    public TwitterSimulator(String username) {
+        this.username = username;
     }
     /*
     public Twitter getTwitterForHomeTimeLine() {
@@ -32,40 +31,49 @@ public class TwitterSimulator {
                 "{\"contributors\":null,\"text\":\"So what happened This Week @NASA? A Congressional hearing on NASA's budget, the Angry Nerd robot and more! [video] http://t.co/cm2PmTTfPP\",\"geo\":null,\"retweeted\":false,\"in_reply_to_screen_name\":null,\"possibly_sensitive\":false,\"truncated\":false,\"lang\":\"en\",\"entities\":{\"symbols\":[],\"urls\":[{\"expanded_url\":\"http://go.nasa.gov/1g87aqp\",\"indices\":[115,137],\"display_url\":\"go.nasa.gov/1g87aqp\",\"url\":\"http://t.co/cm2PmTTfPP\"}],\"hashtags\":[],\"user_mentions\":[{\"id\":11348282,\"name\":\"NASA\",\"indices\":[27,32],\"screen_name\":\"NASA\",\"id_str\":\"11348282\"}]},\"in_reply_to_status_id_str\":null,\"id\":449652196284456961,\"source\":\"<a href=\\\"http://www.exacttarget.com/social\\\" rel=\\\"nofollow\\\">SocialEngage<\\/a>\",\"in_reply_to_user_id_str\":null,\"favorited\":false,\"in_reply_to_status_id\":null,\"retweet_count\":42,\"created_at\":\"Fri Mar 28 21:00:12 +0000 2014\",\"in_reply_to_user_id\":null,\"favorite_count\":42,\"id_str\":\"449652196284456961\",\"place\":null,\"user\":{\"location\":\"\",\"default_profile\":false,\"profile_background_tile\":false,\"statuses_count\":29872,\"lang\":\"en\",\"profile_link_color\":\"55648C\",\"profile_banner_url\":\"https://pbs.twimg.com/profile_banners/11348282/1395856410\",\"id\":11348282,\"following\":true,\"protected\":false,\"favourites_count\":115,\"profile_text_color\":\"000000\",\"description\":\"Explore the universe and discover our home planet with @NASA. We usually post in EDT (UTC-4).\",\"verified\":true,\"contributors_enabled\":false,\"profile_sidebar_border_color\":\"000000\",\"name\":\"NASA\",\"profile_background_color\":\"FFFFFF\",\"created_at\":\"Wed Dec 19 20:20:32 +0000 2007\",\"is_translation_enabled\":false,\"default_profile_image\":false,\"followers_count\":6196107,\"profile_image_url_https\":\"https://pbs.twimg.com/profile_images/188302352/nasalogo_twitter_normal.jpg\",\"geo_enabled\":true,\"profile_background_image_url\":\"http://pbs.twimg.com/profile_background_images/378800000070768280/1e9d3d155ba7cb623d541c764c5ef9c0.jpeg\",\"profile_background_image_url_https\":\"https://pbs.twimg.com/profile_background_images/378800000070768280/1e9d3d155ba7cb623d541c764c5ef9c0.jpeg\",\"follow_request_sent\":false,\"entities\":{\"description\":{\"urls\":[]},\"url\":{\"urls\":[{\"expanded_url\":\"http://www.nasa.gov\",\"indices\":[0,22],\"display_url\":\"nasa.gov\",\"url\":\"http://t.co/TcEE6OahBL\"}]}},\"url\":\"http://t.co/TcEE6OahBL\",\"utc_offset\":-14400,\"time_zone\":\"Eastern Time (US & Canada)\",\"notifications\":false,\"profile_use_background_image\":true,\"friends_count\":211,\"profile_sidebar_fill_color\":\"F3F2F2\",\"screen_name\":\"NASA\",\"id_str\":\"11348282\",\"profile_image_url\":\"http://pbs.twimg.com/profile_images/188302352/nasalogo_twitter_normal.jpg\",\"listed_count\":64378,\"is_translator\":false},\"coordinates\":null}]";
     }
 
-    public Twitter getTwitterForLogin(String username) {
-        ConfigurationBuilder cb = getConfigurationBuilder();
+    public Twitter getTwitterForLogin() {
+        MockWebServer server = getServerForLogin();
+        return createTwitter(server);
+    }
+
+    private MockWebServer getServerForLogin() {
         MockWebServer server = new MockWebServer();
         server.enqueue(new MockResponse().setBody(getRequestToken()));
-        server.enqueue(new MockResponse().setBody(getAuthToken(username)));
-        server.enqueue(new MockResponse().setBody(getLoginJsonWithUsername(username)));
-        return createTwitter(cb, server);
+        server.enqueue(new MockResponse().setBody(getAuthToken()));
+        server.enqueue(new MockResponse().setBody(getLoginJsonWithUsername()));
+        return server;
     }
 
     private String getRequestToken() {
         return "oauth_token=mc9kRRv8z05KkDX9AJxPvQ6wRucCMvlBU1liC987s0&oauth_token_secret=qQN6oRLaxpvevJT8kvqo5IPS7JQnWekco4KPVYnLls&oauth_callback_confirmed=true";
     }
 
-    private String getAuthToken(String username){
+    private String getAuthToken(){
         return "oauth_token=2405056022-zWhCwEGhvIyr5WKQbOnbH9gxsDmcUBGxxnhGI6s&oauth_token_secret=bcqSUSBZvDbSmVvfUHzCA5cI05BnVBvOe3WM7wz085M1b&user_id=2405056022&screen_name="+username;
     }
 
     public Twitter getTwitterForInvalidLogin() {
-        ConfigurationBuilder cb = getConfigurationBuilder();
-        MockWebServer server = new MockWebServer();
-        server.enqueue(new MockResponse().setBody(getRequestToken()).setResponseCode(HttpURLConnection.HTTP_OK));
-        server.enqueue(new MockResponse().setBody("Not authorized!").setResponseCode(HttpURLConnection.HTTP_UNAUTHORIZED));
-        server.enqueue(new MockResponse().setBody(getAuthToken("Test_user")));
-        server.enqueue(new MockResponse().setBody(getLoginJsonWithUsername("Test_user")));
-        return createTwitter(cb, server);
+        MockWebServer server = getServerForInvalidLogin();
+        return createTwitter(server);
 
     }
 
-    private Twitter createTwitter(ConfigurationBuilder cb, MockWebServer server) {
+    private MockWebServer getServerForInvalidLogin() {
+        MockWebServer server = new MockWebServer();
+        server.enqueue(new MockResponse().setBody(getRequestToken()).setResponseCode(HttpURLConnection.HTTP_OK));
+        server.enqueue(new MockResponse().setBody("Not authorized!").setResponseCode(HttpURLConnection.HTTP_UNAUTHORIZED));
+        server.enqueue(new MockResponse().setBody(getAuthToken()));
+        server.enqueue(new MockResponse().setBody(getLoginJsonWithUsername()));
+        return server;
+    }
+
+    private Twitter createTwitter(MockWebServer server) {
         try {
             server.play();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        ConfigurationBuilder cb = getConfigurationBuilder();
         cb.setRestBaseURL(server.getUrl("/twitter/RestBaseURL/").toString());
         cb.setOAuthRequestTokenURL(server.getUrl("/twitter/OAuthRequestTokenURL/").toString());
         cb.setOAuthAccessTokenURL(server.getUrl("/twitter/OAuthAccessTokenURL/").toString());
@@ -84,7 +92,27 @@ public class TwitterSimulator {
         return confBuilder;
     }
 
-    private String getLoginJsonWithUsername(String username) {
+    private String getLoginJsonWithUsername() {
         return "{\"location\":\"\",\"default_profile\":true,\"profile_background_tile\":false,\"statuses_count\":1,\"lang\":\"en\",\"profile_link_color\":\"0084B4\",\"id\":2405056022,\"following\":false,\"protected\":false,\"favourites_count\":0,\"profile_text_color\":\"333333\",\"description\":\"wagtail, twitter console app, great, useful, made with BDD\",\"verified\":false,\"contributors_enabled\":false,\"profile_sidebar_border_color\":\"C0DEED\",\"name\":\"Wagtail\",\"profile_background_color\":\"C0DEED\",\"created_at\":\"Sat Mar 22 21:18:59 +0000 2014\",\"is_translation_enabled\":false,\"default_profile_image\":false,\"followers_count\":0,\"profile_image_url_https\":\"https://pbs.twimg.com/profile_images/447485222125199360/_T9H7blD_normal.jpeg\",\"geo_enabled\":false,\"status\":{\"contributors\":null,\"text\":\"my very first tweet\",\"geo\":null,\"retweeted\":false,\"in_reply_to_screen_name\":null,\"truncated\":false,\"lang\":\"en\",\"entities\":{\"symbols\":[],\"urls\":[],\"hashtags\":[],\"user_mentions\":[]},\"in_reply_to_status_id_str\":null,\"id\":447486650495827970,\"source\":\"web\",\"in_reply_to_user_id_str\":null,\"favorited\":false,\"in_reply_to_status_id\":null,\"retweet_count\":0,\"created_at\":\"Sat Mar 22 21:35:06 +0000 2014\",\"in_reply_to_user_id\":null,\"favorite_count\":0,\"id_str\":\"447486650495827970\",\"place\":null,\"coordinates\":null},\"profile_background_image_url\":\"http://abs.twimg.com/images/themes/theme1/bg.png\",\"profile_background_image_url_https\":\"https://abs.twimg.com/images/themes/theme1/bg.png\",\"follow_request_sent\":false,\"entities\":{\"description\":{\"urls\":[]}},\"url\":null,\"utc_offset\":7200,\"time_zone\":\"Amsterdam\",\"notifications\":false,\"profile_use_background_image\":true,\"friends_count\":16,\"profile_sidebar_fill_color\":\"DDEEF6\",\"screen_name\":\""+username+"\",\"id_str\":\"2405056022\",\"profile_image_url\":\"http://pbs.twimg.com/profile_images/447485222125199360/_T9H7blD_normal.jpeg\",\"listed_count\":0,\"is_translator\":false}";
+    }
+
+    public Twitter getTwitterForDeletion(String id) {
+        MockWebServer server = getServerForLogin();
+        server.enqueue(new MockResponse().setBody(getLoginJsonFromDeletion(id)));
+        return createTwitter(server);
+    }
+
+    private String getLoginJsonFromDeletion(String id) {
+        return "{\"text\":\"alks;afsd\",\"contributors\":null,\"geo\":null,\"retweeted\":false,\"in_reply_to_screen_name\":null,\"truncated\":false,\"entities\":{\"urls\":[],\"hashtags\":[],\"user_mentions\":[]},\"in_reply_to_status_id_str\":null,\"id\":"+id+",\"in_reply_to_user_id_str\":null,\"source\":\"<a href=\\\"http://www.alpargabos.com\\\" rel=\\\"nofollow\\\">wagtailforconsole<\\/a>\",\"favorited\":false,\"in_reply_to_status_id\":null,\"created_at\":\"Wed Apr 02 20:13:25 +0000 2014\",\"retweet_count\":0,\"in_reply_to_user_id\":null,\"id_str\":\"451452362356686848\",\"place\":null,\"user\":{\"location\":null,\"default_profile\":true,\"statuses_count\":1,\"profile_background_tile\":false,\"lang\":\"en\",\"profile_link_color\":\"0084B4\",\"id\":2405056022,\"following\":false,\"favourites_count\":0,\"protected\":false,\"profile_text_color\":\"333333\",\"description\":\"wagtail, twitter console app, great, useful, made with BDD\",\"contributors_enabled\":false,\"verified\":false,\"profile_sidebar_border_color\":\"C0DEED\",\"name\":\"Wagtail\",\"profile_background_color\":\"C0DEED\",\"created_at\":\"Sat Mar 22 21:18:59 +0000 2014\",\"default_profile_image\":false,\"followers_count\":0,\"profile_image_url_https\":\"https://pbs.twimg.com/profile_images/447485222125199360/_T9H7blD_normal.jpeg\",\"geo_enabled\":false,\"profile_background_image_url\":\"http://abs.twimg.com/images/themes/theme1/bg.png\",\"profile_background_image_url_https\":\"https://abs.twimg.com/images/themes/theme1/bg.png\",\"entities\":{\"description\":{\"urls\":[]}},\"follow_request_sent\":false,\"url\":null,\"utc_offset\":3600,\"time_zone\":\"Amsterdam\",\"notifications\":false,\"friends_count\":16,\"profile_use_background_image\":true,\"profile_sidebar_fill_color\":\"DDEEF6\",\"screen_name\":\"wagtailbirdapp\",\"id_str\":\"2405056022\",\"profile_image_url\":\"http://pbs.twimg.com/profile_images/447485222125199360/_T9H7blD_normal.jpeg\",\"is_translator\":false,\"listed_count\":0},\"coordinates\":null}";
+    }
+
+    public Twitter getTwitterForInvalidDeletion(String id) {
+        MockWebServer server = getServerForLogin();
+        server.enqueue(new MockResponse().setBody(getLoginJsonFromInvalidDeletion()).setResponseCode(HttpURLConnection.HTTP_UNAUTHORIZED));
+        return createTwitter(server);
+    }
+
+    private String getLoginJsonFromInvalidDeletion() {
+        return "{\"errors\":[{\"code\":183,\"message\":\"You may not delete another user's status\"}]}";
     }
 }

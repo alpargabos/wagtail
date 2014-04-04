@@ -1,17 +1,19 @@
 package com.alpargabos.wagtail;
 
+import twitter4j.TwitterException;
+
 import java.io.IOException;
 import java.io.OutputStream;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class BaseStepDefs {
-    protected String fullName;
     protected Wagtail wagtail;
     protected TwitterSimulator twitterSimulator;
     protected OutputStream output;
     protected Reader input;
-
 
     protected void initWagtail() {
         wagtail = new Wagtail();
@@ -31,6 +33,12 @@ public class BaseStepDefs {
         input = mock(Reader.class);
         wagtail.setInput(input);
         wagtail.setOutput(output);
-        twitterSimulator = new TwitterSimulator();
     }
+
+    protected void login() throws TwitterException, IOException {
+        wagtail.setTwitter(twitterSimulator.getTwitterForLogin());
+        when(input.getUserInput()).thenReturn("1234567");
+        assertTrue("Unsuccessful login",wagtail.login());
+    }
+
 }

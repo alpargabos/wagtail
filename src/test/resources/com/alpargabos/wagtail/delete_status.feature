@@ -1,4 +1,4 @@
-Feature: Update status
+Feature: Delete status
   As a registered user on Twitter
   I want to delete a tweet
   So my mum cannot find my tweets written in drunk state
@@ -6,7 +6,7 @@ Feature: Update status
   Scenario: Delete one of my tweets
     Given I am wagtail user
     When I delete one of my tweet
-    Then the tweet disappears from my time line
+    Then the tweet deleted from twitter
 
   Scenario: I cannot delete others tweets
     Given I am wagtail user

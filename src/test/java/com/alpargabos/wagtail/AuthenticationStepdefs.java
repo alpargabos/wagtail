@@ -13,6 +13,8 @@ import static org.mockito.Mockito.when;
 
 public class AuthenticationStepdefs extends  BaseStepDefs{
     public static final String PIN_CODE = "1234567";
+    protected String fullName;
+
 
     @Before
     public void beforeScenario(){
@@ -27,11 +29,12 @@ public class AuthenticationStepdefs extends  BaseStepDefs{
     @Given("^I am a twitter user")
     public void I_am_a_twitter_user() throws Throwable {
         fullName = "wagtailbirdapp";
+        twitterSimulator = new TwitterSimulator(fullName);
     }
 
     @When("^I grant access to my account for Wagtail$")
     public void I_grant_access_to_my_account_for_Wagtail() throws Throwable {
-        wagtail.setTwitter(twitterSimulator.getTwitterForLogin(fullName));
+        wagtail.setTwitter(twitterSimulator.getTwitterForLogin());
         when(input.getUserInput()).thenReturn(PIN_CODE);
         wagtail.login();
     }

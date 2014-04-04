@@ -82,10 +82,18 @@ public class Wagtail {
         }
     }
 
-    public void deleteTweet() throws TwitterException {
+    public void deleteTweet(){
         Long id = ui.acquireTweetIdForDeletion();
-        twitter.destroyStatus(id);
-        ui.warnUser("Successfully deleted status [" + id + "].");
+        try {
+            Status status = twitter.destroyStatus(id);
+            ui.warnUser("Successfully deleted status [" + status.getId() + "].");
+        } catch (TwitterException e) {
+            if(TwitterException.UNAUTHORIZED == e.getStatusCode()){
+                ui.warnUser(e.getErrorMessage());
+                ui.warnUser(e.getMessage());
+                ui.warnUser("You cannot delete someone else's tweet!");
+            }
+        }
     }
 
 
