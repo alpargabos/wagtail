@@ -90,6 +90,7 @@ public class WagtailTest {
     public void deleteTweetWithTheGivenId() throws Exception {
         //given
         when(ui.acquireTweetIdForDeletion()).thenReturn(21l);
+        when(twitter.destroyStatus(any(Long.class))).thenReturn(mock(Status.class));
         //when
         wagtail.deleteTweet();
         //then
@@ -122,6 +123,7 @@ public class WagtailTest {
     public void runInReactiveModeForDDeletesAStatus() throws Exception {
         //given
         when(ui.acquireUserAction()).thenReturn("d");
+        when(twitter.destroyStatus(any(Long.class))).thenReturn(mock(Status.class));
         //when
         wagtail.runInReactiveMode();
         //then

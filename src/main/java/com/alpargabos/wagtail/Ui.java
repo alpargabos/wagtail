@@ -39,10 +39,8 @@ public class Ui {
 
     public String acquireNewStatus() {
         String tweet;
-        //do{
-            printer.println("Please write your tweet(in max. 140 characters):");
-            tweet = reader.getUserInput();
-        //} while (tweet.length() > 140);
+        printer.println("Please write your tweet(in max. 140 characters):");
+        tweet = reader.getUserInput();
         return tweet;
     }
 

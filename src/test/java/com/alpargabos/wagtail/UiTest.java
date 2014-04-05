@@ -87,18 +87,6 @@ public class UiTest {
         verify(ui.printer).println(containsAll("^Please", "140 char"));
     }
 
-    @Test
-    public void acquireNewStatusAsksUserUntilItProvidesAvalidTweet() throws Exception {
-        //given
-        when(ui.reader.getUserInput())
-                .thenReturn("This tweet is longer than 140 characters, which is not a valid tweet. orem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")
-                .thenReturn("valid tweet with less than 140 characters");
-        //when
-        String tweet = ui.acquireNewStatus();
-        //then
-        assertThat(tweet, is("valid tweet with less than 140 characters"));
-        verify(ui.printer, times(2)).println(containsAll("Please", "140 char"));
-    }
 
     @Test
     public void acquireTweetIdForDeletion() throws Exception {
