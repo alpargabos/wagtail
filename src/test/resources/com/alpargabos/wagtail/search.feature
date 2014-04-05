@@ -10,11 +10,11 @@ Feature: Search
 
   Scenario: Search for a hastag
     Given I am wagtail user
-    When I search for hastag #haiku
-    Then I got tweets which tagged with #haiku
+    When I search for hashtag "#haiku"
+    Then I got tweets which tagged with "haiku"
 
   Scenario: Search for user mentions
     Given I am wagtail user
-    When I search for @mashable
-    Then I got tweets where @mashable was mentioned
+    When I search for "@mashable"
+    Then I got tweets where user "mashable" was mentioned
 
