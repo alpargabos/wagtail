@@ -67,10 +67,16 @@ public class Wagtail {
         ui.showTimeLine(statuses);
     }
 
-    public void writeStatus() throws TwitterException {
+    public void writeStatus(){
         String status = ui.acquireNewStatus();
-        Status result = twitter.updateStatus(status);
-        ui.showStatus(result);
+        try {
+            Status result = twitter.updateStatus(status);
+            ui.showStatus(result);
+        } catch (TwitterException e) {
+            if(TwitterException.UNAUTHORIZED == e.getStatusCode()){
+                ui.warnUser("You cannot write status longer than 140 characters!");
+            }
+        }
     }
 
     public void searchTweets() throws TwitterException {
@@ -89,8 +95,6 @@ public class Wagtail {
             ui.warnUser("Successfully deleted status [" + status.getId() + "].");
         } catch (TwitterException e) {
             if(TwitterException.UNAUTHORIZED == e.getStatusCode()){
-                ui.warnUser(e.getErrorMessage());
-                ui.warnUser(e.getMessage());
                 ui.warnUser("You cannot delete someone else's tweet!");
             }
         }

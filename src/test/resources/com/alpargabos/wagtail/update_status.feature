@@ -5,13 +5,13 @@ Feature: Update status
 
   Scenario: Write a new tweet
     Given I am wagtail user
-    When I update my status to: "I am on ACCU!"
+    When I update my status to: "I am on ACCU! #FTW"
     Then the following will appear on my time line
     """
-
+    id:452257058373767200 Wagtail:I am on ACCU! #FTW
     """
 
   Scenario: Write a longer tweet than 140 characters
     Given I am wagtail user
-    When I update my status to: "This is a too long tweet, which means it is invalid. Therefore wont appear on my time line! Ho ho ho ho ho hi hi hi hi hi hi hi grrr grgrrrgrrr"
+    When I try to update my status with a tweet more than 140 characters
     Then nothing happens on my time line
